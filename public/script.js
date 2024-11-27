@@ -45,6 +45,26 @@ function displayMessage(message, sender) {
     chatbox.scrollTop = chatbox.scrollHeight;
 }
 
+async function performWebSearch(query) {
+    try {
+        const response = await fetch('/web-search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ query })
+        });
+        const data = await response.json();
+
+        if (data.results) {
+            displayMessage(JSON.stringify(data.results, null, 2), 'bot');
+        } else {
+            displayMessage('No results found.', 'bot');
+        }
+    } catch (error) {
+        console.error('Error performing web search:', error);
+        displayMessage('Error: Unable to perform web search.', 'bot');
+    }
+}
+
 // Fetch all conversations from the server
 async function updateConversationList() {
     const response = await fetch(`/get-conversations?userId=default`);

@@ -2,6 +2,12 @@ const express = require('express');
 const { spawn } = require('child_process');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const fs = require('fs');
+
+let fetch;
+(async () => {
+    fetch = (await import('node-fetch')).default;
+})();
 
 const app = express();
 app.use(express.json());
@@ -9,9 +15,53 @@ app.use(express.json());
 // Serve static files from the public directory
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Memory object to store user conversations
+// File for persistent memory storage
+const memoryFile = 'memory.txt';
+
+// Memory object to store user conversations in memory (for quick access)
 const userConversations = {};
 
+// Load existing memory from memory.txt
+function loadMemory() {
+    if (!fs.existsSync(memoryFile)) return;
+    const data = fs.readFileSync(memoryFile, 'utf8');
+    data.split('\n').filter(Boolean).forEach((line) => {
+        const { userId, conversationId, messages } = JSON.parse(line);
+        if (!userConversations[userId]) userConversations[userId] = {};
+        userConversations[userId][conversationId] = messages;
+    });
+}
+
+// Save a conversation to memory.txt
+function saveToMemory(userId, conversationId, messages) {
+    const entry = { userId, conversationId, messages };
+    fs.appendFileSync(memoryFile, JSON.stringify(entry) + '\n');
+}
+
+// Load memory on server startup
+loadMemory();
+
+// Web search endpoint
+app.post('/web-search', async (req, res) => {
+    const { query } = req.body;
+
+    if (!query) {
+        return res.status(400).json({ error: 'Query is required.' });
+    }
+
+    try {
+        // Replace with your web search API endpoint
+        const response = await fetch(`https://api.example.com/search?q=${encodeURIComponent(query)}`);
+        const data = await response.json();
+
+        res.json({ results: data });
+    } catch (error) {
+        console.error('Error during web search:', error);
+        res.status(500).json({ error: 'Failed to perform web search.' });
+    }
+});
+
+// Create a new conversation
 app.post('/new-conversation', (req, res) => {
     const userId = req.body.userId || 'default';
     const conversationId = `conversation-${Date.now()}`;
@@ -25,6 +75,8 @@ app.post('/new-conversation', (req, res) => {
     userConversations[userId][conversationId] = [
         { role: 'bot', content: 'Hi! I am a helpful AI assistant, how may I help you?' }
     ];
+
+    saveToMemory(userId, conversationId, userConversations[userId][conversationId]);
 
     res.json({ conversationId });
 });
@@ -44,7 +96,6 @@ app.get('/get-conversations', (req, res) => {
     res.json({ conversations });
 });
 
-
 // Delete a specific conversation
 app.delete('/delete-conversation', (req, res) => {
     const userId = req.body.userId || 'default';
@@ -56,9 +107,20 @@ app.delete('/delete-conversation', (req, res) => {
 
     // Delete the conversation
     delete userConversations[userId][conversationId];
+
+    // Rewrite memory file without the deleted conversation
+    const allConversations = [];
+    Object.entries(userConversations).forEach(([user, convs]) => {
+        Object.entries(convs).forEach(([id, messages]) => {
+            allConversations.push({ userId: user, conversationId: id, messages });
+        });
+    });
+    fs.writeFileSync(memoryFile, allConversations.map((entry) => JSON.stringify(entry)).join('\n'));
+
     res.json({ success: true });
 });
 
+// Chat endpoint
 app.post('/chat', (req, res) => {
     const userMessage = req.body.message;
     const userId = req.body.userId || 'default';
@@ -109,6 +171,9 @@ app.post('/chat', (req, res) => {
 
         // Append the AI response to the conversation
         userConversations[userId][conversationId].push({ role: 'ai', content: aiResponse });
+
+        // Save updated conversation to memory
+        saveToMemory(userId, conversationId, userConversations[userId][conversationId]);
 
         res.json({ response: aiResponse });
     });
