@@ -28,6 +28,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - run: npm install
+      - run: brew install ollama
+      - run: ollama pull llama3.2
       - run: npm start
       - run: npm install
       - run: brew install ollama
