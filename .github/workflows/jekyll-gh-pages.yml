@@ -28,6 +28,7 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+      - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
       - run: npm install
       - run: brew install ollama
       - run: ollama pull llama3.2
