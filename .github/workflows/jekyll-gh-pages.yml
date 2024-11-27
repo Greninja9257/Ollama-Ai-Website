@@ -28,11 +28,6 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - run: /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
-      - run: echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
-      - run: sudo apt-get install build-essential
-      - run: brew install gcc
-      - run: eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
       - run: npm install
       - run: npm start
       - run: npm install
