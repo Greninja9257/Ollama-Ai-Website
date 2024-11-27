@@ -29,8 +29,8 @@ This project is a chat-based application that leverages a backend powered by Nod
 
 1. Clone the repository:
    ```
-   git clone <repository-url>
-   cd <repository-folder>
+   git clone https://github.com/Greninja9257/Ollama-Ai-Website
+   cd Ollama-Ai-Website-Master // or whatever its called
    ```
 Install dependencies:
 
