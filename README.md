@@ -48,17 +48,31 @@ Open the application in your browser:
 http://localhost:3000
 ```
 Usage
+
 Open the application in a web browser.
+
 Start a new conversation or select an existing one from the sidebar.
+
 Type your message in the input box and hit "Send".
+
 View AI-generated responses in the chat area.
+
 API Endpoints
+
 POST /new-conversation: Start a new conversation.
+
 GET /get-conversations: Retrieve a list of all conversations.
+
 DELETE /delete-conversation: Delete a specific conversation.
+
 POST /chat: Send a message and receive AI-generated responses.
+
 Development
+
 To modify the front-end, edit the index.html and script.js files.
+
 To extend backend functionality, modify server.js.
+
 License
+
 This project is licensed under the Apache License. See LICENSE for more details.
