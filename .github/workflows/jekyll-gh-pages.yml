@@ -29,10 +29,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - run: npm install
-      - run: npm start
-      - run: npm install
       - run: yay -S ollama
       - run: ollama pull llama3.2
+      - run: ollama run llama3.2 "test"
       - name: Setup Pages
         uses: actions/configure-pages@v5
         with:
