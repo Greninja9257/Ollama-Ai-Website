@@ -1,11 +1,14 @@
 {
-  "name": "chat-web",
+  "name": "ollama-website",
   "version": "1.0.0",
   "description": "A chat application powered by Node.js and Ollama's llama3.2 AI model.",
-  "main": "server.js",
+  "main": "main.js",
   "scripts": {
-    "start": "node server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "start": "concurrently \"npm run start-server\" \"npm run start-electron\"",
+    "start-server": "node server.js",
+    "start-electron": "electron .",
+    "build": "electron-builder",
+    "postinstall": "electron-builder install-app-deps"
   },
   "keywords": [
     "chat",
@@ -22,7 +25,22 @@
     "path": "^0.12.7",
     "uuid": "^9.0.0"
   },
-  "engines": {
-    "node": ">=16.x"
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^24.0.0",
+    "concurrently": "^8.2.0"
+  },
+  "build": {
+    "appId": "com.example.ollama-website",
+    "productName": "Ollama Website",
+    "mac": {
+      "target": "dmg"
+    },
+    "win": {
+      "target": "nsis"
+    },
+    "linux": {
+      "target": "AppImage"
+    }
   }
 }
