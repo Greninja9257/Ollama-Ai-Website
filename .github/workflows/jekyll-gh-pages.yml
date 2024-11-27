@@ -1,4 +1,4 @@
-name: Install and Build
+name: Install and Build Workflow
 
 on:
   push:
@@ -10,34 +10,53 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Cache
-      uses: actions/cache@v4.1.2    
     - name: Checkout Code
       uses: actions/checkout@v3
 
-    - name: Install Dependencies
+    - name: Install System Dependencies
       run: |
-        sudo apt remove -y containerd docker docker.io || true
+        # Update package list and fix held packages
         sudo apt update
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
-        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-        sudo apt update
-        sudo apt install -y docker-ce docker-ce-cli containerd.io
-        # Update package list
-        sudo apt update
-        
-        # Install system dependencies
-        sudo apt install -y build-essential curl git docker.io golang snapd
+        sudo apt full-upgrade -y
+        sudo apt autoremove -y
 
+        # Remove conflicting packages
+        sudo apt remove -y containerd docker docker.io || true
+
+        # Add Docker's official GPG key
+        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+
+        # Add Docker repository
+        echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+        # Install required system packages
+        sudo apt update
+        sudo apt install -y build-essential curl git docker-ce docker-ce-cli containerd.io golang
+
+    - name: Install Homebrew and Additional Libraries
+      run: |
         # Install Homebrew
         /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
         echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
         eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"
 
-        # Install additional libraries with Homebrew
+        # Install required libraries with Homebrew
         brew install gcc ollama
 
-        # Install Node.js dependencies individually
-        npm install express
-        npm install uuid
-        npm install path
+    - name: Install Node.js Dependencies
+      run: |
+        npm install express uuid path
+
+    - name: Verify Installation
+      run: |
+        docker --version
+        gcc --version
+        ollama version
+        node --version
+        npm --version
+
+    - name: Build Project
+      run: npm run build || echo "No build step defined"
+
+    - name: Start Application
+      run: npm start
