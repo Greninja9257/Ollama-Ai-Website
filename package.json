@@ -1,0 +1,21 @@
+{
+  "name": "chat-web",
+  "version": "1.0.0",
+  "description": "A chat application powered by Node.js and Ollama's llama3.2 AI model.",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": ["chat", "AI", "llama3.2", "Node.js", "Express"],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.18.2",
+    "path": "^0.12.7",
+    "uuid": "^9.0.0"
+  },
+  "engines": {
+    "node": ">=16.x"
+  }
+}
